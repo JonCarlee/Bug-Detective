@@ -7,5 +7,7 @@ namespace BugDetective.Models.LookupTables
 {
     public class TicketStatuses
     {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

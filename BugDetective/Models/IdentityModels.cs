@@ -29,5 +29,19 @@ namespace BugDetective.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<BugDetective.Models.DataTables.Attachments> Attachments { get; set; }
+
+        public System.Data.Entity.DbSet<BugDetective.Models.DataTables.Comments> Comments { get; set; }
+        
+        public System.Data.Entity.DbSet<BugDetective.Models.DataTables.Projects> Projects { get; set; }
+        
+        public System.Data.Entity.DbSet<BugDetective.Models.DataTables.Tickets> Tickets { get; set; }
+        
+        public System.Data.Entity.DbSet<BugDetective.Models.LookupTables.TicketPriorities> TicketPriorities { get; set; }
+
+        public System.Data.Entity.DbSet<BugDetective.Models.LookupTables.TicketStatuses> TicketStatuses { get; set; }
+
+        public System.Data.Entity.DbSet<BugDetective.Models.LookupTables.TicketTypes> TicketTypes { get; set; }
     }
 }

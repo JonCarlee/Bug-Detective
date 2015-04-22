@@ -175,6 +175,7 @@
     <Compile Include="Models\LookupTables\TicketStatuses.cs" />
     <Compile Include="Models\LookupTables\TicketTypes.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\UserRolesHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
