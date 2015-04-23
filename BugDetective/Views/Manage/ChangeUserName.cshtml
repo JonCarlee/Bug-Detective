@@ -1,0 +1,28 @@
+﻿@model BugDetective.Models.ApplicationUser
+@{
+    ViewBag.Title = "ChangeUserName";
+}
+<div class="container">
+    <h2>ChangeUserName</h2>
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="userId" value="@Model.Id" />
+        <p>Old UserName: @if (Model.UserName == null)
+                         {
+                             @: None
+                         }
+                         else{
+                             @Model.UserName
+                         }</p>
+        <div class="row">
+            <p>
+                New Username:<input type="text" name="username" />
+                <button type="submit">Change UserName</button>
+            </p>
+        </div>
+    </form>
+
+</div>
+
+

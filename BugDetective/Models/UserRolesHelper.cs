@@ -14,12 +14,18 @@ namespace BugDetective.Models
         new UserStore<ApplicationUser>(
             new ApplicationDbContext()));
         // GET: Helper
+
         public class UserRolesViewModel
         {
             //This will need to be tweaked
-            public string roleId { get; set; }
             public string roleName { get; set; }
+            public ApplicationUser User { get; set; }
+        }
+
+        public class ListUserRole
+        {
             public List<ApplicationUser> Users { get; set; }
+            public List<Microsoft.AspNet.Identity.EntityFramework.IdentityRole> Roles { get; set; }
         }
 
 

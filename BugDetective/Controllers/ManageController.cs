@@ -16,10 +16,88 @@ namespace BugDetective.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
+        private ApplicationDbContext db = new ApplicationDbContext();
+
         public ManageController()
         {
         }
+        private UserRolesHelper helper = new UserRolesHelper();
 
+
+        public ActionResult ChangeUserName(string id)
+        {
+            var user = db.Users.Find(id);
+            return View(user);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditRole(string id, string newRole, string oldRole)
+        {
+            if (oldRole == newRole)
+            {
+                ViewBag.Error = "Please select a different role for that user.";
+                return View();
+            }
+            var user = db.Users.Find(id);
+            if (oldRole != "")
+            {
+                helper.RemoveUserFromRole(id, oldRole);
+            }
+            if (newRole != "null")
+            {
+                helper.AddUserToRole(id, newRole);
+            }
+            return RedirectToAction("ManageUsers");
+        }
+
+
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult EditRole(string id)
+        {
+            var model = new BugDetective.Models.UserRolesHelper.UserRolesViewModel();
+            model.User = db.Users.Find(id);
+            var curr = model.User.Roles.ToList();
+ 
+            foreach (var role in db.Roles.ToList())
+            {
+                foreach (var userrole in curr)
+                {
+                    if (userrole.RoleId == role.Id)
+                        model.roleName = role.Name;
+                }
+            }
+            
+            
+            return View(model);
+        }
+
+        [Authorize(Roles="Admin")]
+        public ActionResult ManageUsers()
+        {
+            var model = new UserRolesHelper.ListUserRole();
+            model.Users = db.Users.ToList();
+            model.Roles = db.Roles.ToList();
+
+            return View(model);
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeUserName(string userId, string username)
+        {
+            var user = db.Users.Find(userId);
+            user.DisplayName = username;
+            db.Entry(user).Property(p => p.DisplayName).IsModified = true;
+            db.SaveChanges();
+            return RedirectToAction("Index", "Manage");
+        }
         public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;

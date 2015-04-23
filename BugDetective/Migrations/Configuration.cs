@@ -41,41 +41,55 @@ namespace BugDetective.Migrations
             }
             var userManager = new UserManager<ApplicationUser>(
                 new UserStore<ApplicationUser>(context));
-            /*
+
             ApplicationUser user;
 
+            //Beginning of Adding Admin
             if (!context.Users.Any(r => r.Email == "joncarlee@gmail.com"))
             {
                 user = new ApplicationUser
                 {
-                    UserName = "Jon Carlee",
+                    UserName = "joncarlee@gmail.com",
                     Email = "joncarlee@gmail.com",
+                    FirstName = "Jon",
+                    LastName = "Carlee",
+                    DisplayName = "Jon Carlee"
                 };
-                userManager.Create(new ApplicationUser { }, "Abc123");
+                userManager.Create(user, "This is my page");
             }
             else
             {
                 user = context.Users.Single(u => u.Email == "joncarlee@gmail.com");
             }
+            
             if (!userManager.IsInRole(user.Id, "Admin"))
             {
                 userManager.AddToRole(user.Id, "Admin");
             }
+             
+            /*
+            if (!context.Users.Any(r => r.Email == "pm@pm.com"))
+            {
+                user = new ApplicationUser
+                {
+                    UserName = "Mr. Project",
+                    Email = "pm@pm.com",
+                    FirstName = "Sir",
+                    LastName = "Project",
+                    DisplayName = "Project Manager"
+                };
+                userManager.Create(user, "go");
+            }
+            else
+            {
+                user = context.Users.Single(u => u.Email == "pm@pm.com");
+            }
+            if (!userManager.IsInRole(user.Id, "Project Manager"))
+            {
+                userManager.AddToRole(user.Id, "Project Manager ");
+            }
             */
-            //Adding Other Things To Database
-            
-            new TicketStatuses {Name = "New"};
-            new TicketStatuses {Name = "Opened"};
-            new TicketStatuses {Name = "Closed"};
-            new TicketStatuses {Name = "Resolved"};
 
-            new TicketPriorities {Name = "Low"};
-            new TicketPriorities {Name = "High"};
-            new TicketPriorities {Name = "Critical"};
-
-            new TicketTypes { Name = "Add" };
-            new TicketTypes { Name = "Change" };
-            new TicketTypes { Name = "Problem" };
 
             }
         }

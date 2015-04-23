@@ -1,0 +1,66 @@
+﻿@model BugDetective.Models.UserRolesHelper.ListUserRole
+@{ ViewBag.Title = "ManageUser"; }
+
+
+<div class="container">
+    <h2 style="text-align: center">ManageUser</h2>
+    <table class="table">
+        <tr>
+            <th>
+                User Name
+            </th>
+            <th>
+                Email
+            </th>
+            <th>
+                First Name
+            </th>
+            <th style="width: 400px;">
+                Last Name
+            </th>
+            <th>
+                Display Name
+            </th>
+            <th>Roles</th>
+        </tr>
+
+        @foreach (var item in Model.Users)
+        {
+            <tr>
+                <td>
+                    @Html.Raw(item.UserName)
+                </td>
+                <td>
+                    @Html.Raw(item.Email)
+                </td>
+                <td>
+                    @Html.Raw(item.FirstName)
+                </td>
+                <td id="stupid">
+                    @Html.Raw(item.LastName)
+                </td>
+                <td>
+                    @Html.Raw(item.DisplayName)
+                </td>
+                <td>
+                    @foreach (var roleid in item.Roles)
+                    {
+                        foreach (var rolename in Model.Roles)
+                        {
+                            if (rolename.Id.Equals(roleid.RoleId))
+                            {
+                                var name = rolename.Name;
+                                @Html.Raw(name);
+                            }
+                        }
+                    }
+                </td>
+                <td>
+                    <a href="/Manage/EditRole/@item.Id" name="id" class="btn btn-color">Edit</a>
+                    @Html.ActionLink("Delete", "DeleteUser", new { id = item.Id })
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>

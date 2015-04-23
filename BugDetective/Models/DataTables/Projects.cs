@@ -9,5 +9,6 @@ namespace BugDetective.Models.DataTables
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public List<ApplicationUser> Users { get; set; }
     }
 }
