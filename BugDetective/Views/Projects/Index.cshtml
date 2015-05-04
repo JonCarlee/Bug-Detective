@@ -1,11 +1,17 @@
 ﻿@model IEnumerable<BugDetective.Models.DataTables.Projects>
-
+@using Microsoft.AspNet.Identity;
 @{
     ViewBag.Title = "Index";
 }
 
 <h2>Index</h2>
 
+@if(User.IsInRole("Admin")){
+    <a href="/Manage/ManageUsers" class="btn btn-primary">Manage Users</a>
+}
+else{
+    
+}
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
@@ -14,14 +20,22 @@
         <th>
             @Html.DisplayNameFor(model => model.Name)
         </th>
+        <th>
+            Project Manager
+        </th>
         <th></th>
     </tr>
-    @if (User.IsInRole("Admin"))
+    <!--
+    //if(User.IsInRole("Admin"))
     {
-        foreach (var item in Model) {
+        -->
+        @foreach (var item in Model) {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Manager.UserName)
                 </td>
                 <td>
                     @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
@@ -30,10 +44,26 @@
                 </td>
             </tr>
     }
-}
-    <!--else if (User.IsInRole("Project Manager"))
+        <!--
+    }
+
+    else
     {
-        foreach(var item in Model.Where(p => p.Id = User.))
+        foreach (var item2 in Model.Where(p => p.ManagerId == User.Identity.GetUserId()))
+        {
+            <tr>
+                <td>
+                    //Html.DisplayFor(modelItem => item2.Name)
+                </td>
+                <td>
+                    //Html.DisplayFor(modelItem => item2.Manager.UserName)
+                </td>
+                <td>
+                    //Html.ActionLink("Edit", "Edit", new { id=item2.Id }) |
+                    //Html.ActionLink("Details", "Details", new { id=item2.Id }) |
+                    //Html.ActionLink("Delete", "Delete", new { id=item2.Id })
+                </td>
+                }
     }
         -->
 </table>

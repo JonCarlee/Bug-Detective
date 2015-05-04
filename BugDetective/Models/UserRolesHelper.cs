@@ -1,32 +1,91 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using BugDetective.Models.DataTables;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 
 namespace BugDetective.Models
 {
-    public class UserRolesHelper
+
+    public class UserProjectsHelper
     {
-        private UserManager<ApplicationUser> manager =
-    new UserManager<ApplicationUser>(
-        new UserStore<ApplicationUser>(
-            new ApplicationDbContext()));
-        // GET: Helper
 
-        public class UserRolesViewModel
+        private ApplicationDbContext db = new ApplicationDbContext();
+
+        public bool IsUserInProject(string userId, int projectId)
         {
-            //This will need to be tweaked
-            public string roleName { get; set; }
-            public ApplicationUser User { get; set; }
+            return db.Projects.Find(projectId).Users.Any(u => u.Id == userId);
         }
 
-        public class ListUserRole
+        public void AddUserToProject(string userId, int projectId){
+	    if (!IsUserInProject(userId, projectId))
+	    {
+    	var project = db.Projects.Find(projectId);
+	    project.Users.Add(db.Users.Find(userId));
+    	db.Entry(project).State = EntityState.Modified;
+	    db.SaveChanges();
+	    }
+	    }
+
+	    public void RemoveUserFromProject (string userId, int projectId){
+	    if (IsUserInProject(userId, projectId))
+	{
+	/*My one liner
+	db.Projects.Find(projectId).Users.Remove(db.Users.Find(userId));
+	*/
+	    var project = db.Projects.Find(projectId);
+	    project.Users.Remove(db.Users.Find(userId));
+	    db.Entry(project).State = EntityState.Modified;
+	    db.SaveChanges();
+	    }
+	    }
+
+	public ICollection<Projects> ListProjectsForUser(string userId){
+		return db.Users.Find(userId).Projects;
+	}
+
+	public ICollection<ApplicationUser> ListUsersOnProject(int projectId){
+		return db.Projects.Find(projectId).Users;
+	}
+
+	public ICollection<ApplicationUser> ListUsersNotOnProject (int projectId){
+
+	return db.Users.Where(u => u.Projects.All(p => p.Id != projectId)).ToList();
+
+	}
+}
+
+    public class ProjectUsersViewModel{
+	    public int projectId { get; set; }
+	    public string projectName { get; set; }
+    	[Display(Name = "Available Users")]
+    	public System.Web.Mvc.MultiSelectList Users { get; set; }
+	    public string[] SelectedUsers { get; set; }
+    }
+        public class UserRolesHelper
         {
-            public List<ApplicationUser> Users { get; set; }
-            public List<Microsoft.AspNet.Identity.EntityFramework.IdentityRole> Roles { get; set; }
-        }
+            private UserManager<ApplicationUser> manager =
+        new UserManager<ApplicationUser>(
+            new UserStore<ApplicationUser>(
+                new ApplicationDbContext()));
+            // GET: Helper
+
+            public class UserRolesViewModel
+            {
+                //This will need to be tweaked
+                public string roleName { get; set; }
+                public ApplicationUser User { get; set; }
+            }
+
+            public class ListUserRole
+            {
+                public List<ApplicationUser> Users { get; set; }
+                public List<Microsoft.AspNet.Identity.EntityFramework.IdentityRole> Roles { get; set; }
+            }
 
 
 

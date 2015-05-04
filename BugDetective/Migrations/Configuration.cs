@@ -55,7 +55,7 @@ namespace BugDetective.Migrations
                     LastName = "Carlee",
                     DisplayName = "Jon Carlee"
                 };
-                userManager.Create(user, "This is my page");
+                userManager.Create(user, "##########");
             }
             else
             {

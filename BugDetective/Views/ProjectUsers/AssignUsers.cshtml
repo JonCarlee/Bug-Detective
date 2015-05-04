@@ -1,0 +1,13 @@
+﻿@model BugDetective.Models.ProjectUsersViewModel
+
+@{
+    ViewBag.Title = "AssignUsers";
+}
+
+<h2>AssignUsers</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.DropDownList("SelectedUsers", new MultiSelectList(@Model.Users, "Id", "Email"))
+    <input type="submit" value="Assign Users" />
+}

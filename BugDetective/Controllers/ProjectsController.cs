@@ -37,8 +37,26 @@ namespace BugDetective.Controllers
         }
 
         // GET: Projects/Create
+        [Authorize(Roles="Admin")]
         public ActionResult Create()
         {
+            var allUsers = db.Users.ToList();
+            var users = new List<ApplicationUser>();
+            
+           // var managers = db.Users.Where(u => u.Roles.Any(r => r.RoleId.Equals(manager.;
+            foreach (var user in allUsers)
+            {
+                foreach(var userroles in user.Roles)
+                {
+                    foreach (var role in db.Roles.ToList())
+                    {
+                        if (userroles.RoleId == role.Id && role.Name == "Project Manager")
+                            users.Add(user);
+                    }
+                }
+                    
+            }
+            ViewBag.Managers = new SelectList(users, "Id", "Email");
             return View();
         }
 
@@ -47,21 +65,30 @@ namespace BugDetective.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name")] Projects projects, string id)
+        public ActionResult Create([Bind(Include = "Id,Name,Manager")] Projects project, string Managers)
         {
             if (ModelState.IsValid)
             {
-                db.Projects.Add(projects);
+                /*
+                var user = db.Users.Find(Managers);
+                user.Projects.Add(project);
+                project.Manager = user;
+                project.Users.Add(user);
+                db.Projects.Add(project);
+                */
+                var user = db.Users.Find(Managers);
+                project.ManagerId = user.Id; 
+                db.Projects.Add(project);
+                project.Users.Add(user);
                 db.SaveChanges();
-                projects.Users.Add(new ApplicationUser());
-                var newUser = new ApplicationUser { Id = id };
-                db.Users.Attach(newUser);
-                projects.Users.Add(newUser);
+
+                //foreach(UserId in UserList)
+                    //project.Users.Add(UserId)
 
                 return RedirectToAction("Index");
             }
 
-            return View(projects);
+            return View(project);
         }
 
         // GET: Projects/Edit/5

@@ -15,6 +15,14 @@ namespace BugDetective.Controllers
 
         public ActionResult Index()
         {
+            if (User.IsInRole("Submitter"))
+            {
+                return RedirectToAction("Index", "Tickets");
+            }
+            else if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Projects");
+            }
             return View();
         }
 

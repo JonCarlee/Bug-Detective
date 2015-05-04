@@ -7,6 +7,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using BugDetective.Models;
+using System.Net;
+using BugDetective.Models.DataTables;
 
 namespace BugDetective.Controllers
 {
@@ -74,6 +76,26 @@ namespace BugDetective.Controllers
             
             return View(model);
         }
+
+        public ActionResult Delete(ApplicationUser user)
+        {
+            if (user.Equals(null))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(string id)
+        {
+            ApplicationUser user = db.Users.Find(id);
+            db.Users.Remove(user);
+            db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
 
         [Authorize(Roles="Admin")]
         public ActionResult ManageUsers()

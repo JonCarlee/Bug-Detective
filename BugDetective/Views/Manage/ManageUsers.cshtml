@@ -1,4 +1,5 @@
 ﻿@model BugDetective.Models.UserRolesHelper.ListUserRole
+@using Microsoft.AspNet.Identity
 @{ ViewBag.Title = "ManageUser"; }
 
 
@@ -57,7 +58,7 @@
                 </td>
                 <td>
                     <a href="/Manage/EditRole/@item.Id" name="id" class="btn btn-color">Edit</a>
-                    @Html.ActionLink("Delete", "DeleteUser", new { id = item.Id })
+                    @Html.ActionLink("Delete","Delete", new { Model = item})
                 </td>
             </tr>
         }

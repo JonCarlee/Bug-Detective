@@ -1,0 +1,15 @@
+﻿@model BugDetective.Models.ApplicationUser
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+<form method="post">
+    @Html.AntiForgeryToken()
+    <p>Are you sure you want to delete this user?</p>
+    <p>Email : @Model.Email</p>
+    <p>User Name: @Model.UserName</p>
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="/Manage/ManageUsers" class="btn btn-primary">Cancel</a>
+</form>

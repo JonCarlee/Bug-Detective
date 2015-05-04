@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using BugDetective.Models;
+using PagedList;
+using PagedList.Mvc;
 
 namespace BugDetective.Models.DataTables
 {
@@ -15,10 +17,10 @@ namespace BugDetective.Models.DataTables
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Tickets
-        public ActionResult Index()
+        public ActionResult Index(string keyword, string column, int? page)
         {
-            var tickets = db.Tickets.Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType);
-            return View(tickets.ToList());
+
+            return View(db.Tickets.ToList());
         }
 
         // GET: Tickets/Details/5
@@ -51,10 +53,13 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,AssignedToUserId")] Tickets tickets)
+        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerUserId")] Tickets tickets)
         {
             if (ModelState.IsValid)
             {
+                tickets.TicketStatusId = 1;
+                tickets.TicketPriorityId = 4;
+                tickets.Created = System.DateTimeOffset.Now;
                 db.Tickets.Add(tickets);
                 db.SaveChanges();
                 return RedirectToAction("Index");
