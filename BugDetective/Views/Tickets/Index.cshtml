@@ -3,7 +3,8 @@
 @{
     ViewBag.Title = "Index";
 }
-<link href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css" rel="stylesheet">
+
+
 <h2>Index</h2>
 
 <p>
@@ -36,10 +37,10 @@
             @Html.DisplayNameFor(model => model.Updated)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.OwnerUserId)
+            Owner
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.AssignedToUserId)
+            Assigned
         </th>
         <th></th>
     </tr>
@@ -87,7 +88,7 @@
     }
     else { 
         foreach (var item in Model) {
-            if (item.AssignedToUserId == User.Identity.GetUserId()) { 
+            if (item.AssignedToUserId == User.Identity.GetUserId() || item.OwnerUserId == User.Identity.GetUserId() || item.Project.ManagerId == User.Identity.GetUserId()) { 
     <tr>
         <td>
             @Html.DisplayFor(modelItem => item.Project.Name)
@@ -131,7 +132,6 @@
 </table>
 
 @section Scripts{
-    <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
             $('#Tickets').DataTable();

@@ -11,7 +11,7 @@
 </p>
 <div>
     <h3>@Model.Name</h3>
-    <h4>Project Manager: @Model.Manager.Email</h4>
+    <h4>Project Manager: @Model.Manager.DisplayName</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -19,7 +19,7 @@
         </dt>
         @foreach (var thing in Model.Users) { 
         <dd>
-           thing.Name
+           @Html.DisplayFor(user => thing.DisplayName)
         </dd>
         }
     </dl>

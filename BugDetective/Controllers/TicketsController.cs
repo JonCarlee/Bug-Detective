@@ -53,23 +53,26 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerUserId")] Tickets tickets)
+        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerUserId")] Tickets ticket)
         {
             if (ModelState.IsValid)
             {
-                tickets.TicketStatusId = 1;
-                tickets.TicketPriorityId = 4;
-                tickets.Created = System.DateTimeOffset.Now;
-                db.Tickets.Add(tickets);
+                ticket.TicketStatusId = 1;
+                ticket.TicketPriorityId = 4;
+                ticket.Created = System.DateTimeOffset.Now;
+                ticket.Owner = db.Users.Find(ticket.OwnerUserId);
+                var test = new Tickets();
+                test = ticket;
+                db.Tickets.Add(ticket);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
-            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
-            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
-            return View(tickets);
+            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", ticket.ProjectId);
+            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+            return View(ticket);
         }
 
         // GET: Tickets/Edit/5

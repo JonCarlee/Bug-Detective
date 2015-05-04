@@ -121,6 +121,7 @@ namespace BugDetective.Controllers
                 var newUser = new ApplicationUser { Id = id };
                 db.Users.Attach(newUser);
                 projects.Users.Add(newUser);
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(projects);
