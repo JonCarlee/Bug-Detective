@@ -50,5 +50,7 @@ namespace BugDetective.Models
         public System.Data.Entity.DbSet<BugDetective.Models.LookupTables.TicketStatuses> TicketStatuses { get; set; }
 
         public System.Data.Entity.DbSet<BugDetective.Models.LookupTables.TicketTypes> TicketTypes { get; set; }
+
+        public System.Data.Entity.DbSet<BugDetective.Models.TicketHistory> TicketHistories { get; set; }
     }
 }

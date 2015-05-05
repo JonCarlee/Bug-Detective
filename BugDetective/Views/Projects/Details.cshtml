@@ -13,6 +13,7 @@
     <h3>@Model.Name</h3>
     <h4>Project Manager: @Model.Manager.DisplayName</h4>
     <hr />
+    <a href="/ProjectUsers/AssignUsers/@Model.Id" class="btn btn-primary">Assign Users</a>
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Users)
@@ -86,10 +87,10 @@
                     @Html.DisplayFor(modelItem => ticket.Updated)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => ticket.OwnerUserId)
+                    @Html.DisplayFor(modelItem => ticket.Owner.DisplayName)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => ticket.AssignedToUserId)
+                    @Html.DisplayFor(modelItem => ticket.Assigned.DisplayName)
                 </td>
                 <td>
                     @Html.ActionLink("Edit", "Edit", "Tickets", new { id = ticket.Id }) |

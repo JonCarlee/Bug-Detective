@@ -14,7 +14,7 @@ namespace BugDetective.Controllers
     public class ProjectsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
+        private UserProjectsHelper helper = new UserProjectsHelper();
         // GET: Projects
         public ActionResult Index()
         {
@@ -41,6 +41,9 @@ namespace BugDetective.Controllers
         public ActionResult Create()
         {
             var allUsers = db.Users.ToList();
+            var role = db.Roles.First(r => r.Name == "Project Manager");
+            var users = allUsers.Where(u => u.Roles.Any(r => r.RoleId == role.Id));
+            /*
             var users = new List<ApplicationUser>();
             
            // var managers = db.Users.Where(u => u.Roles.Any(r => r.RoleId.Equals(manager.;
@@ -56,6 +59,7 @@ namespace BugDetective.Controllers
                 }
                     
             }
+             */
             ViewBag.Managers = new SelectList(users, "Id", "Email");
             return View();
         }
@@ -78,8 +82,7 @@ namespace BugDetective.Controllers
                 */
                 var user = db.Users.Find(Managers);
                 project.ManagerId = user.Id; 
-                db.Projects.Add(project);
-                project.Users.Add(user);
+                db.Projects.Add(project).Users.Add(user);
                 db.SaveChanges();
 
                 //foreach(UserId in UserList)
@@ -92,7 +95,7 @@ namespace BugDetective.Controllers
         }
 
         // GET: Projects/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
             if (id == null)
             {
@@ -103,6 +106,7 @@ namespace BugDetective.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.NotAssigned = new SelectList(helper.ListUsersNotOnProject(id), "Id", "DisplayName", id);
             return View(projects);
         }
 

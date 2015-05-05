@@ -143,4 +143,31 @@ namespace BugDetective.Models
                 return resultList;
             }
         }
+        public class TicketHistory {
+            public int Id { get; set; }
+            public string EditId { get; set; }
+            public int TicketId { get; set; }
+            public string UserId { get; set; }
+            public string Property { get; set; }
+            public string OldValue { get; set; }
+            public string NewValue { get; set; }
+            public DateTimeOffset Changed { get; set; }
+        }
+
+        public class TicketHistoriesHelper
+        {
+            public TicketHistory MakeTicketHistory(string editid, int ticketid, string userid, string property, string oldvalue, string newvalue)
+            {
+                return new TicketHistory
+                {
+                    EditId = editid,
+                    TicketId = ticketid,
+                    UserId = userid,
+                    Property = property,
+                    OldValue = oldvalue,
+                    NewValue = newvalue,
+                    Changed = System.DateTimeOffset.Now,
+                };
+            }
+        }
     }

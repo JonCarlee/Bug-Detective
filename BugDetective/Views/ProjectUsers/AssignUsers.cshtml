@@ -8,6 +8,7 @@
 
 @using (Html.BeginForm())
 {
-    @Html.DropDownList("SelectedUsers", new MultiSelectList(@Model.Users, "Id", "Email"))
+    @Html.AntiForgeryToken()
+    @Html.ListBox("SelectedUsers", Model.Users)
     <input type="submit" value="Assign Users" />
 }

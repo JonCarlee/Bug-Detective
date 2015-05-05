@@ -9,12 +9,13 @@ using System.Web.Mvc;
 using BugDetective.Models;
 using PagedList;
 using PagedList.Mvc;
-
+using Microsoft.AspNet.Identity;
 namespace BugDetective.Models.DataTables
 {
     public class TicketsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        private TicketHistoriesHelper helper = new TicketHistoriesHelper();
 
         // GET: Tickets
         public ActionResult Index(string keyword, string column, int? page)
@@ -103,6 +104,64 @@ namespace BugDetective.Models.DataTables
         {
             if (ModelState.IsValid)
             {
+                var user = db.Users.Find(User.Identity.GetUserId());
+                //AsNoTracking - Get values but don't reference object in database
+                var OldTicket = (from t in db.Tickets.AsNoTracking()
+                                 where t.Id == tickets.Id
+                                 select t).FirstOrDefault();
+
+                var EditId = Guid.NewGuid().ToString();
+                var reassign = false;
+
+                List<TicketHistory> History = new List<TicketHistory>();
+                //OR
+                //var oldTicket = db.Ticket.AsNoTracking().FirstOrDefault(t => t.Id == ticket.Id);
+                if (OldTicket.Description != tickets.Description)
+                {
+                    var DescriptionHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Description", OldTicket.Description, tickets.Description);
+                    History.Add(DescriptionHistory);
+                }
+
+                if (OldTicket.ProjectId != tickets.ProjectId)
+                {
+                    var ProjectHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Project", OldTicket.Project.Name, tickets.Project.Name);
+                    History.Add(ProjectHistory);
+                }
+
+                if (OldTicket.TicketTypeId != tickets.TicketTypeId)
+                {
+                    var TicketTypeHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Type", OldTicket.TicketType.Name, tickets.TicketType.Name);
+                    History.Add(TicketTypeHistory);
+                }
+
+                if (OldTicket.TicketPriorityId != tickets.TicketPriorityId)
+                {
+                    var TicketPriorityHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Priority", OldTicket.TicketPriority.Name, tickets.TicketPriority.Name);
+                    History.Add(TicketPriorityHistory);
+                }
+
+                if (OldTicket.TicketStatusId != tickets.TicketStatusId)
+                {
+                    var TicketStatusHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Status", OldTicket.TicketStatus.Name, tickets.TicketStatus.Name);
+                    History.Add(TicketStatusHistory);
+                }
+
+                if (OldTicket.AssignedToUserId != tickets.AssignedToUserId)
+                {
+                    var AssignedHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Assigned User", OldTicket.AssignedToUserId, tickets.AssignedToUserId);
+                    History.Add(AssignedHistory);
+                    reassign = true;
+                }
+
+                db.TicketHistories.AddRange(History);
+                if (reassign == true) { 
+                new EmailService().SendAsync(new IdentityMessage{
+                    Subject = "You have been assigned a new ticket",
+                    Destination = user.Email,
+                    Body = "This is to make sure it gets there"
+                });
+                }
+                tickets.Updated = DateTimeOffset.Now;
                 db.Entry(tickets).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
