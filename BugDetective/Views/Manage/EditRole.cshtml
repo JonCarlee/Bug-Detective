@@ -6,7 +6,7 @@
 
 <div class="container">
     <h2>EditRole</h2>
-    <h4>Username: @Model.User.Email</h4>
+    <h4>Username: @Model.User.DisplayName</h4>
     <h4>
         Current Role: @if (Model.roleName == null)
         {
@@ -21,12 +21,7 @@
         @Html.AntiForgeryToken()
         <input type="hidden" name="oldrole" value="@Model.roleName" />
         <input type="hidden" name="id" value="@Model.User.Id" />
-        <select name="newRole">
-            <option value="Submitter">Submitter</option>
-            <option value="Developer">Developer</option>
-            <option value="Project Manager">Project Manager</option>
-            <option value="Admin">Admin</option>
-        </select>
+        @Html.DropDownList("newRole")
         <input type="submit" class="btn btn-color" value="Change Role" />
     </form>
 </div>

@@ -100,14 +100,18 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,AssignedToUserId")] Tickets tickets)
+        public ActionResult Edit([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,AssignedToUserId")] Tickets ticket)
         {
             if (ModelState.IsValid)
             {
                 var user = db.Users.Find(User.Identity.GetUserId());
+                var project = db.Projects.Find(ticket.ProjectId);
+                var type = db.TicketTypes.Find(ticket.TicketTypeId);
+                var status = db.TicketStatuses.Find(ticket.TicketStatusId);
+                var priority = db.TicketPriorities.Find(ticket.TicketPriorityId);
                 //AsNoTracking - Get values but don't reference object in database
                 var OldTicket = (from t in db.Tickets.AsNoTracking()
-                                 where t.Id == tickets.Id
+                                 where t.Id == ticket.Id
                                  select t).FirstOrDefault();
 
                 var EditId = Guid.NewGuid().ToString();
@@ -116,39 +120,39 @@ namespace BugDetective.Models.DataTables
                 List<TicketHistory> History = new List<TicketHistory>();
                 //OR
                 //var oldTicket = db.Ticket.AsNoTracking().FirstOrDefault(t => t.Id == ticket.Id);
-                if (OldTicket.Description != tickets.Description)
+                if (OldTicket.Description != ticket.Description)
                 {
-                    var DescriptionHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Description", OldTicket.Description, tickets.Description);
+                    var DescriptionHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Description", OldTicket.Description, ticket.Description);
                     History.Add(DescriptionHistory);
                 }
 
-                if (OldTicket.ProjectId != tickets.ProjectId)
+                if (OldTicket.ProjectId != ticket.ProjectId)
                 {
-                    var ProjectHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Project", OldTicket.Project.Name, tickets.Project.Name);
+                    var ProjectHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Project", OldTicket.Project.Name, project.Name);
                     History.Add(ProjectHistory);
                 }
 
-                if (OldTicket.TicketTypeId != tickets.TicketTypeId)
+                if (OldTicket.TicketTypeId != ticket.TicketTypeId)
                 {
-                    var TicketTypeHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Type", OldTicket.TicketType.Name, tickets.TicketType.Name);
+                    var TicketTypeHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Ticket Type", OldTicket.TicketType.Name, type.Name);
                     History.Add(TicketTypeHistory);
                 }
 
-                if (OldTicket.TicketPriorityId != tickets.TicketPriorityId)
+                if (OldTicket.TicketPriorityId != ticket.TicketPriorityId)
                 {
-                    var TicketPriorityHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Priority", OldTicket.TicketPriority.Name, tickets.TicketPriority.Name);
+                    var TicketPriorityHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Ticket Priority", OldTicket.TicketPriority.Name, priority.Name);
                     History.Add(TicketPriorityHistory);
                 }
 
-                if (OldTicket.TicketStatusId != tickets.TicketStatusId)
+                if (OldTicket.TicketStatusId != ticket.TicketStatusId)
                 {
-                    var TicketStatusHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Ticket Status", OldTicket.TicketStatus.Name, tickets.TicketStatus.Name);
+                    var TicketStatusHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Ticket Status", OldTicket.TicketStatus.Name, status.Name);
                     History.Add(TicketStatusHistory);
                 }
 
-                if (OldTicket.AssignedToUserId != tickets.AssignedToUserId)
+                if (OldTicket.AssignedToUserId != ticket.AssignedToUserId)
                 {
-                    var AssignedHistory = helper.MakeTicketHistory(EditId, tickets.Id, user.Id, "Assigned User", OldTicket.AssignedToUserId, tickets.AssignedToUserId);
+                    var AssignedHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Assigned User", OldTicket.AssignedToUserId, ticket.AssignedToUserId);
                     History.Add(AssignedHistory);
                     reassign = true;
                 }
@@ -161,16 +165,16 @@ namespace BugDetective.Models.DataTables
                     Body = "This is to make sure it gets there"
                 });
                 }
-                tickets.Updated = DateTimeOffset.Now;
-                db.Entry(tickets).State = EntityState.Modified;
+                ticket.Updated = DateTimeOffset.Now;
+                db.Entry(ticket).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
-            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
-            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
-            return View(tickets);
+            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", ticket.ProjectId);
+            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+            return View(ticket);
         }
 
         // GET: Tickets/Delete/5
