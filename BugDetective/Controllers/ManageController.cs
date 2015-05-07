@@ -62,8 +62,9 @@ namespace BugDetective.Controllers
         {
             var model = new BugDetective.Models.UserRolesHelper.UserRolesViewModel();
             model.User = db.Users.Find(id);
-            var curr = model.User.Roles.First();
-            model.roleName = db.Roles.First(r => r.Id == curr.RoleId).Name;
+            var curr = model.User.Roles.FirstOrDefault();
+            var role = db.Roles.FirstOrDefault(r => r.Id == curr.RoleId);
+            model.roleName = role != null ? role.Name : "";
             ViewBag.newRole = new SelectList(db.Roles.ToList(), "Name", "Name");
             return View(model);
         }

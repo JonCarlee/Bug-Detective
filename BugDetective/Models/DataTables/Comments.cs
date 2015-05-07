@@ -8,6 +8,10 @@ namespace BugDetective.Models.DataTables
 {
     public class Comments
     {
+        public Comments()
+        {
+            this.Attachments = new HashSet<Attachments>();
+        }
         public int Id { get; set; }
         [Required]
         public string Comment { get; set; }
@@ -17,5 +21,6 @@ namespace BugDetective.Models.DataTables
 
         public virtual Tickets Ticket { get; set; }
         public virtual ApplicationUser User { get; set; }
+        public virtual ICollection<Attachments> Attachments { get; set; }
     }
 }

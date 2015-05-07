@@ -10,6 +10,7 @@ using BugDetective.Models;
 using PagedList;
 using PagedList.Mvc;
 using Microsoft.AspNet.Identity;
+using System.IO;
 namespace BugDetective.Models.DataTables
 {
     public class TicketsController : Controller
@@ -38,6 +39,65 @@ namespace BugDetective.Models.DataTables
             }
             return View(tickets);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Details(string comment, HttpPostedFileBase[] images, int ticketId)
+        {
+            if (comment == "")
+            {
+                return RedirectToAction("Details", new { Id = ticketId });
+            }
+            var user = User.Identity.GetUserId();
+            var aComment = new Comments
+            {
+                Comment = comment,
+                Created = DateTimeOffset.Now,
+                TicketId = ticketId,
+                UserId = user,
+            };
+            var curr = new Attachments();
+            var Attach = new List<Attachments>();
+            if (images != null)
+            {
+                foreach (HttpPostedFileBase image in images)
+                {
+                    var ext = Path.GetExtension(image.FileName);
+                    if (ext != ".png" && ext != ".jpg" && ext != ".txt")
+                        ModelState.AddModelError("image", "Invalid Format");
+                    if (ModelState.IsValid)
+                    {
+                        var filePath = "/Uploads/TicketAttachments/images/";
+                        var absPath = Server.MapPath("~" + filePath);
+                        image.SaveAs(Path.Combine(absPath, image.FileName));
+
+                        curr = new Attachments
+                        {
+                            TicketId = ticketId,
+                            CommentId = aComment.Id,
+                            Filepath = filePath,
+                            Created = aComment.Created,
+                            UserId = aComment.UserId,
+                            FileUrl = filePath + image.FileName
+                        };
+                        Attach.Add(curr);
+                    }
+                }
+                aComment.Attachments = Attach;
+                db.Comments.Add(aComment);
+                db.Attachments.AddRange(Attach);
+                db.Tickets.Find(ticketId).TicketComments.Add(aComment);
+                db.SaveChanges();
+                return RedirectToAction("Details", new { Id = ticketId });
+            }
+            else
+            {
+                db.Comments.Add(aComment);
+                db.Tickets.Find(ticketId).TicketComments.Add(aComment);
+                db.SaveChanges();
+                return RedirectToAction("Details", new { Id = ticketId });
+            }
+
+        }
 
         // GET: Tickets/Create
         public ActionResult Create()
@@ -54,16 +114,14 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerUserId")] Tickets ticket)
+        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerId")] Tickets ticket)
         {
             if (ModelState.IsValid)
             {
                 ticket.TicketStatusId = 1;
                 ticket.TicketPriorityId = 4;
                 ticket.Created = System.DateTimeOffset.Now;
-                ticket.Owner = db.Users.Find(ticket.OwnerUserId);
-                var test = new Tickets();
-                test = ticket;
+                ticket.Owner = db.Users.Find(ticket.OwnerId);
                 db.Tickets.Add(ticket);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -92,6 +150,7 @@ namespace BugDetective.Models.DataTables
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
             ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
+            ViewBag.AssignedId = new SelectList(db.Users, "Id", "DisplayName");
             return View(tickets);
         }
 
@@ -100,7 +159,7 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,AssignedToUserId")] Tickets ticket)
+        public ActionResult Edit([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerId,AssignedId")] Tickets ticket)
         {
             if (ModelState.IsValid)
             {
@@ -109,6 +168,7 @@ namespace BugDetective.Models.DataTables
                 var type = db.TicketTypes.Find(ticket.TicketTypeId);
                 var status = db.TicketStatuses.Find(ticket.TicketStatusId);
                 var priority = db.TicketPriorities.Find(ticket.TicketPriorityId);
+                var assigned = db.Users.Find(ticket.AssignedId);
                 //AsNoTracking - Get values but don't reference object in database
                 var OldTicket = (from t in db.Tickets.AsNoTracking()
                                  where t.Id == ticket.Id
@@ -150,14 +210,15 @@ namespace BugDetective.Models.DataTables
                     History.Add(TicketStatusHistory);
                 }
 
-                if (OldTicket.AssignedToUserId != ticket.AssignedToUserId)
+                if (OldTicket.AssignedId != ticket.AssignedId)
                 {
-                    var AssignedHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Assigned User", OldTicket.AssignedToUserId, ticket.AssignedToUserId);
+                    var AssignedHistory = helper.MakeTicketHistory(EditId, ticket.Id, user.Id, "Assigned User", (OldTicket.Assigned != null ? OldTicket.Assigned.DisplayName : "null"), assigned.DisplayName);
                     History.Add(AssignedHistory);
                     reassign = true;
                 }
 
                 db.TicketHistories.AddRange(History);
+                ticket.TicketHistories = History;
                 if (reassign == true) { 
                 new EmailService().SendAsync(new IdentityMessage{
                     Subject = "You have been assigned a new ticket",
@@ -165,7 +226,9 @@ namespace BugDetective.Models.DataTables
                     Body = "This is to make sure it gets there"
                 });
                 }
+
                 ticket.Updated = DateTimeOffset.Now;
+                ticket.Assigned = db.Users.Find(ticket.AssignedId);
                 db.Entry(ticket).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");

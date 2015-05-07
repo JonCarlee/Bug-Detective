@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Details";
 }
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
 <h2>Details</h2>
 
@@ -11,7 +12,7 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Project.Name)
+            Project
         </dt>
 
         <dd>
@@ -19,7 +20,7 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.TicketPriority.Name)
+            Ticket Priority
         </dt>
 
         <dd>
@@ -27,7 +28,7 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.TicketStatus.Name)
+            Ticket Status
         </dt>
 
         <dd>
@@ -35,7 +36,7 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.TicketType.Name)
+            Ticket Type
         </dt>
 
         <dd>
@@ -75,24 +76,144 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.OwnerUserId)
+            Submitted By
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.OwnerUserId)
+            @Html.DisplayFor(model => model.Owner.DisplayName)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.AssignedToUserId)
+            User Assigned
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.AssignedToUserId)
+            @Html.DisplayFor(model => model.Assigned.DisplayName)
         </dd>
 
     </dl>
+
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-1">Submit A Comment</a></li>
+            <li><a href="#tabs-2">Comments</a></li>
+            <li><a href="#tabs-3">Histories</a></li>
+        </ul>
+        <div id="tabs-1">
+            <div class="well">
+                <h4>Leave a Comment:</h4>
+                <form role="form" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ticketId" value="@Model.Id" />
+                    <!--<input type="hidden" name="ticketId" value="//Model.Id" />
+                    <input type="hidden" name="authorId" value="//User.Identity.GetUserId()" />
+                    <input type="hidden" name="author" value="//User.Identity.Name" />
+                        -->
+                    <div class="form-group">
+                        <textarea class="form-control" name="comment" rows="3"></textarea>
+                    </div>
+                    <input type="file" name="images" multiple="multiple" />
+
+                    <button type="submit" class="btn btn-color">Submit</button>
+                </form>
+            </div>
+            </div>
+        <div id="tabs-2">
+            @if (Model.TicketComments.Count != 0) { 
+                foreach (var comment in Model.TicketComments)
+                {
+                    <div class="well">
+                        <h4 style="text-align:center">@comment.User.DisplayName</h4>
+                        <p>@comment.Comment</p>
+                        <div class="row">
+    @if (comment.Attachments != null)
+    {
+        foreach (var attachment in comment.Attachments)
+        {
+                <a href="" data-toggle="modal" data-target="#@attachment.Id">
+                    <img src="@attachment.FileUrl" style="max-height: 100px; max-width: 100px; min-height: 100px; min-width:100px" />
+                </a>
+
+        <div class="modal fade" id="@attachment.Id" tabindex="-1" role="dialog"
+             aria-labelledby="image" aria-hidden="true" >
+            <div class="modal-dialog" >
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class=" close" data-dismiss="modal"
+                                aria-hidden="true">
+                            x
+                        </button>
+                    </div>
+                    <div class="modal-body col-sm-12">
+                        <img src="@attachment.FileUrl" class="img-responsive"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        }
+    }
+                                            
+                        </div>                
+                    </div>                    
+            }
+            }
+            else
+            {
+                <h2 style="text-align:center">There are currently no comments for this ticket.</h2>
+            }
+
+                                   
+        </div>                 
+        <div id="tabs-3">
+            @if (Model.TicketHistories.Count != 0)
+            {
+                foreach (var history in Model.TicketHistories)
+                {
+                    <div class="well">
+                        <p>@history.Changed &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @history.Property was changed from @history.OldValue to @history.NewValue by @history.User.DisplayName</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="well">
+                    <h2 style="text-align: center">There are currently no histories for this ticket.</h2>
+                </div>
+            }
+
+        </div>             
+    </div>
 </div>
+
+<!--
+<div class="well">
+    <h4>Leave a Comment:</h4>
+        <form role="form" method="post">
+            //Html.AntiForgeryToken()
+            <input type="hidden" name="ticketId" value="//Model.Id" />
+            <input type="hidden" name="authorId" value="//User.Identity.GetUserId()" />
+            <input type="hidden" name="author" value="//User.Identity.Name" />
+            <div class="form-group">
+                <textarea class="form-control" name="body" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-color">Submit</button>
+        </form>
+</div>
+    -->
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")
 </p>
+
+@section Scripts{
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+    $(function () {
+        $("#tabs").tabs();
+    });
+</script>
+
+}

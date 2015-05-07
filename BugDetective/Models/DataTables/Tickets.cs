@@ -25,9 +25,10 @@ namespace BugDetective.Models.DataTables
         public int TicketTypeId { get; set; }
         public int TicketPriorityId { get; set; }
         public int TicketStatusId { get; set; }
-        public string OwnerUserId { get; set; }
-        public string AssignedToUserId { get; set; }
+        public string OwnerId { get; set; }
+        public string AssignedId { get; set; }
 
+        public virtual ICollection<TicketHistory> TicketHistories { get; set; }
         public virtual ICollection<Comments> TicketComments { get; set; }
         public virtual ICollection<Attachments> Attachments { get; set; }
         public virtual Projects Project { get; set; }

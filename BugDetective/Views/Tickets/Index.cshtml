@@ -95,7 +95,7 @@
         {
             foreach (var item in Model)
             {
-                if (item.AssignedToUserId == User.Identity.GetUserId() || item.OwnerUserId == User.Identity.GetUserId() || item.Project.ManagerId == User.Identity.GetUserId())
+                if (item.AssignedId == User.Identity.GetUserId() || item.OwnerId == User.Identity.GetUserId() || item.Project.ManagerId == User.Identity.GetUserId())
                 {
                     <tr>
                         <td>
