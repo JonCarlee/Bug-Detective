@@ -18,6 +18,8 @@ namespace BugDetective.Models
 
         public bool IsUserInProject(string userId, int projectId)
         {
+            if (db.Projects.Find(projectId).Users.Count == 0)
+                return false;
             return db.Projects.Find(projectId).Users.Any(u => u.Id == userId);
         }
 

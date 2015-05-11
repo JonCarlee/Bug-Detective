@@ -1,5 +1,5 @@
 ﻿@model BugDetective.Models.DataTables.Tickets
-
+@using Microsoft.AspNet.Identity
 @{
     ViewBag.Title = "Edit";
 }
@@ -17,7 +17,26 @@
         @Html.HiddenFor(model => model.Id)
         @Html.HiddenFor(model => model.Title)
         @Html.HiddenFor(model => model.Created)
-        @Html.HiddenFor(Model => Model.OwnerId)
+        @Html.HiddenFor(model => model.OwnerId)
+
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.ProjectId, "Project", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("ProjectId", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+    <div class="form-group">
+        <p>Project: @Model.Project.Name</p>
+    </div>
+        }
+        @if (User.IsInRole("Admin") || Model.OwnerId == User.Identity.GetUserId()) { 
         <div class="form-group">
             @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -25,15 +44,16 @@
                 @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
             </div>
         </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ProjectId, "Project", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("ProjectId", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+        }
+        else
+        {
+            <input type="hidden" name="Description" value="@Model.Description" />
+            <div class="form-group">
+                @Html.Display(Model.Description)
             </div>
-        </div>
+        }
 
+        @if(User.IsInRole("Admin") || User.IsInRole("Project Manager")){
         <div class="form-group">
             @Html.LabelFor(model => model.TicketTypeId, "Ticket Type", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -49,7 +69,14 @@
                 @Html.ValidationMessageFor(model => model.TicketPriorityId, "", new { @class = "text-danger" })
             </div>
         </div>
-
+        }
+        else
+        {
+            <input type="hidden" name="TicketTypeId" value="@Model.TicketTypeId" />
+            <input type="hidden" name="TicketPriorityId" value="@Model.TicketPriorityId" />
+            <p>Ticket Type: @Model.TicketType.Name</p>
+            <p>Ticket Priority: @Model.TicketPriority.Name</p>
+        }
         <div class="form-group">
             @Html.LabelFor(model => model.TicketStatusId, "Ticket Status", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -58,7 +85,7 @@
             </div>
         </div>
 
-
+        @if(User.IsInRole("Admin") || User.IsInRole("Project Manager")){
         <div class="form-group">
             @Html.LabelFor(model => model.AssignedId, "User Assigned", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -66,6 +93,13 @@
                 @Html.ValidationMessageFor(model => model.Assigned.DisplayName, "", new { @class = "text-danger" })
             </div>
         </div>
+        }
+        else
+        {
+            <input type="hidden" name="AssignedId" value="@Model.AssignedId" />
+            <p>User Assigned: @Model.Assigned.DisplayName</p>
+        }
+        
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

@@ -11,6 +11,7 @@ using BugDetective.Models.DataTables;
 
 namespace BugDetective.Controllers
 {
+    [Authorize(Roles="Admin,Project Manager,Developer")]
     public class ProjectsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -60,7 +61,7 @@ namespace BugDetective.Controllers
                     
             }
              */
-            ViewBag.Managers = new SelectList(users, "Id", "Email");
+            ViewBag.Managers = new SelectList(users, "Id", "DisplayName");
             return View();
         }
 
@@ -106,6 +107,10 @@ namespace BugDetective.Controllers
             {
                 return HttpNotFound();
             }
+            var allUsers = db.Users.ToList();
+            var role = db.Roles.First(r => r.Name == "Project Manager");
+            var users = allUsers.Where(u => u.Roles.Any(r => r.RoleId == role.Id));
+            ViewBag.Managers = new SelectList(users, "Id", "DisplayName");
             ViewBag.NotAssigned = new SelectList(helper.ListUsersNotOnProject(id), "Id", "DisplayName", id);
             return View(projects);
         }
@@ -115,16 +120,12 @@ namespace BugDetective.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name")] Projects projects, string id)
+        public ActionResult Edit([Bind(Include = "Id,Name,Manager")] Projects projects, string id, string Managers)
         {
             if (ModelState.IsValid)
             {
+                projects.ManagerId = Managers;
                 db.Entry(projects).State = EntityState.Modified;
-                db.SaveChanges();
-                projects.Users.Add(new ApplicationUser());
-                var newUser = new ApplicationUser { Id = id };
-                db.Users.Attach(newUser);
-                projects.Users.Add(newUser);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }

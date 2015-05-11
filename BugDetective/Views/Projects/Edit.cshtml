@@ -23,6 +23,12 @@
                 @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
             </div>
         </div>
+        @if(User.IsInRole("Admin")){
+        <div class="form-group">
+            @Html.DropDownList("Managers", null, htmlAttributes: new { @class = "form-control"})
+        </div>
+        }
+        else { <input type="hidden" name="Manager" value="@Model.Manager.DisplayName" />}
         <!--
         <div class="form-group">
             //Html.LabelFor(model => model.Users, "Assign Users", htmlAttributes: new { //class = "control-label col-md-2" })

@@ -14,6 +14,7 @@
     <h4>Project Manager: @Model.Manager.DisplayName</h4>
     <hr />
     <a href="/ProjectUsers/AssignUsers/@Model.Id" class="btn btn-primary">Assign Users</a>
+    <a href="/ProjectUsers/RemoveUsers/@Model.Id" class="btn btn-danger">Remove Users</a>
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Users)
@@ -24,6 +25,9 @@
         </dd>
         }
     </dl>
+    <br />
+    <br />
+    <br />
     @Html.ActionLink("Create New Ticket", "Create", "Tickets")
     <table class="table" id="Tickets">
         <tr>

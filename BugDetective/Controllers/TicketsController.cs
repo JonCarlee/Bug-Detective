@@ -13,6 +13,7 @@ using Microsoft.AspNet.Identity;
 using System.IO;
 namespace BugDetective.Models.DataTables
 {
+    [Authorize]
     public class TicketsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -57,12 +58,12 @@ namespace BugDetective.Models.DataTables
             };
             var curr = new Attachments();
             var Attach = new List<Attachments>();
-            if (images != null)
+            if (images.Count() != 0 && images[0] != null)
             {
                 foreach (HttpPostedFileBase image in images)
                 {
                     var ext = Path.GetExtension(image.FileName);
-                    if (ext != ".png" && ext != ".jpg" && ext != ".txt")
+                    if (ext.ToLower() != ".png" && ext.ToLower() != ".jpg" && ext.ToLower() != ".txt")
                         ModelState.AddModelError("image", "Invalid Format");
                     if (ModelState.IsValid)
                     {
@@ -114,9 +115,46 @@ namespace BugDetective.Models.DataTables
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerId")] Tickets ticket)
+        public ActionResult Create([Bind(Include = "Id,Title,Description,Created,ProjectId,TicketTypeId,TicketStatusId,OwnerId,Attachments")] Tickets ticket, HttpPostedFileBase[] images)
         {
-            if (ModelState.IsValid)
+                var curr = new Attachments();
+                var Attach = new List<Attachments>();
+                if (images.Count() != 0 && images[0] != null)
+                {
+                    foreach (HttpPostedFileBase image in images)
+                    {
+                        var ext = Path.GetExtension(image.FileName);
+                        if (ext.ToLower() != ".png" && ext.ToLower() != ".jpg" && ext.ToLower() != ".txt")
+                            ModelState.AddModelError("image", "Invalid Format");
+                        if (ModelState.IsValid)
+                        {
+                            var filePath = "/Uploads/TicketAttachments/images/";
+                            var absPath = Server.MapPath("~" + filePath);
+                            image.SaveAs(Path.Combine(absPath, image.FileName));
+
+                            curr = new Attachments
+                            {
+                                TicketId = ticket.Id,
+                                CommentId = null,
+                                Filepath = filePath,
+                                Created = DateTimeOffset.Now,
+                                UserId = ticket.OwnerId,
+                                FileUrl = filePath + image.FileName
+                            };
+                            Attach.Add(curr);
+                        }
+                    }
+                    ticket.Attachments = Attach;
+                    ticket.TicketStatusId = 1;
+                    ticket.TicketPriorityId = 4;
+                    ticket.Created = System.DateTimeOffset.Now;
+                    ticket.Owner = db.Users.Find(ticket.OwnerId);
+                    db.Tickets.Add(ticket);
+                    db.SaveChanges();
+                    return RedirectToAction("Details", new { id = ticket.Id });
+                }
+            
+            else if (ModelState.IsValid)
             {
                 ticket.TicketStatusId = 1;
                 ticket.TicketPriorityId = 4;
@@ -124,17 +162,19 @@ namespace BugDetective.Models.DataTables
                 ticket.Owner = db.Users.Find(ticket.OwnerId);
                 db.Tickets.Add(ticket);
                 db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+                return RedirectToAction("Details", new { id = ticket.Id });
 
-            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", ticket.ProjectId);
-            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
-            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", ticket.TicketTypeId);
-            return View(ticket);
+
+            }
+                ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", ticket.ProjectId);
+                ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+                ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+                ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+                return View(ticket);
         }
 
         // GET: Tickets/Edit/5
+        [Authorize(Roles="Admin,Project Manager,Developer")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -146,11 +186,20 @@ namespace BugDetective.Models.DataTables
             {
                 return HttpNotFound();
             }
+            var role = db.Roles.FirstOrDefault(r => r.Name == "Developer");
+            var users = db.Users.ToList();
+            var AssignedId = new List<ApplicationUser>();
+            foreach (var unit in users){
+                foreach(var thing in unit.Roles){
+                    if(thing.RoleId == role.Id)
+                        AssignedId.Add(unit);
+                }
+            }
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
             ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
-            ViewBag.AssignedId = new SelectList(db.Users, "Id", "DisplayName");
+            ViewBag.AssignedId = new SelectList(AssignedId, "Id", "DisplayName");
             return View(tickets);
         }
 
@@ -158,6 +207,7 @@ namespace BugDetective.Models.DataTables
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin,Project Manager,Developer")]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,Title,Description,Created,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerId,AssignedId")] Tickets ticket)
         {
@@ -219,12 +269,28 @@ namespace BugDetective.Models.DataTables
 
                 db.TicketHistories.AddRange(History);
                 ticket.TicketHistories = History;
-                if (reassign == true) { 
-                new EmailService().SendAsync(new IdentityMessage{
-                    Subject = "You have been assigned a new ticket",
-                    Destination = user.Email,
-                    Body = "This is to make sure it gets there"
-                });
+                if (reassign == true) {
+                    new EmailService().SendAsync(new IdentityMessage
+                    {
+                        Subject = "You have been assigned a new ticket",
+                        Destination = assigned.Email,
+                        Body = "Hello, " + assigned.FirstName + "." + Environment.NewLine + Environment.NewLine +
+                        "You have recently been assigned a new ticket by: " + user.DisplayName + Environment.NewLine + Environment.NewLine +
+                        "Project: " + project.Name + Environment.NewLine + "Title: " + ticket.Title + Environment.NewLine +
+                        "Description: " + ticket.Description + Environment.NewLine + "Priority: " + priority.Name
+                    });
+                }
+                else
+                {
+                    new EmailService().SendAsync(new IdentityMessage
+                    {
+                        Subject = "A ticket you have been assigned to has changed",
+                        Destination = assigned.Email,
+                        Body = "Hello, " + assigned.FirstName + "." + "\r\n" + "\r\n" +
+                        "The ticket '" + OldTicket.Title + "' has been changed to the following by: " + user.DisplayName + Environment.NewLine + Environment.NewLine +
+                        "Project: " + project.Name + Environment.NewLine + "Title: " + ticket.Title + Environment.NewLine +
+                        "Description: " + ticket.Description + Environment.NewLine + "Priority: " + priority.Name
+                    });
                 }
 
                 ticket.Updated = DateTimeOffset.Now;
@@ -241,6 +307,7 @@ namespace BugDetective.Models.DataTables
         }
 
         // GET: Tickets/Delete/5
+        [Authorize(Roles="Admin")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -256,6 +323,7 @@ namespace BugDetective.Models.DataTables
         }
 
         // POST: Tickets/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)

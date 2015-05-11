@@ -62,15 +62,39 @@ namespace BugDetective.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
-
+        
         //
         // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
+        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl, bool? admin, bool? projectManager, bool? developer, bool? submitter)
         {
-            if (!ModelState.IsValid)
+            if (admin == true)
+            {
+                model.Email = "admin@admin.admin";
+                model.Password = "Abc123!";
+                model.RememberMe = false;
+            }
+            else if (projectManager == true)
+            {
+                model.Email = "project@project.project";
+                model.Password = "Abc123!";
+                model.RememberMe = false;
+            }
+            else if (developer == true)
+            {
+                model.Email = "developer@developer.developer";
+                model.Password = "Abc123!";
+                model.RememberMe = false;
+            }
+            else if (submitter == true)
+            {
+                model.Email = "submitter@submitter.submitter";
+                model.Password = "Abc123!";
+                model.RememberMe = false;
+            }
+            else if (!ModelState.IsValid)
             {
                 return View(model);
             }
@@ -81,9 +105,8 @@ namespace BugDetective.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    if (User.IsInRole("Submitter"))
-                        return RedirectToAction ("Index", "Tickets");
-                    return RedirectToAction("Index", "Projects");
+
+                    return RedirectToAction("Index", "Tickets");
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:

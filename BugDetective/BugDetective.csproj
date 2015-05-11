@@ -351,6 +351,7 @@
     <Content Include="Views\Manage\ManageUsers.cshtml" />
     <Content Include="Views\ProjectUsers\AssignUsers.cshtml" />
     <Content Include="Views\Manage\Delete.cshtml" />
+    <Content Include="Views\ProjectUsers\RemoveUsers.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

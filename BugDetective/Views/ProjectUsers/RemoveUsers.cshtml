@@ -1,10 +1,10 @@
 ﻿@model BugDetective.Models.ProjectUsersViewModel
 
 @{
-    ViewBag.Title = "AssignUsers";
+    ViewBag.Title = "RemoveUsers";
 }
 
-<h2>AssignUsers</h2>
+<h2>RemoveUsers</h2>
 
 @using (Html.BeginForm())
 {
@@ -12,5 +12,5 @@
     <input type="hidden" name="projectId" value="@Model.projectId" />
     @Html.ListBox("SelectedUsers", Model.Users)
     
-    <input type="submit" value="Assign Users" />
+    <input type="submit" value="Remove Users From Project" class="btn btn-danger"/>
 }

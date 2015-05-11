@@ -5,5 +5,34 @@
 <div class="jumbotron" style="text-align:center">
     <h1>Bug Detective</h1>
     <p class="lead">Welcome to Bug Detective!  Please sign in to get started.</p>
-    <p><a href="/Account/Register" class="btn btn-primary btn-lg">Sign Up</a></p>
+    <div class="row">
+        <div class="col-sm-3">
+            <form method="post" action="~/Account/Login">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="admin" value="true" />
+                <input type="submit" value="Sign In As Admin" class="btn btn-primary" />
+            </form>
+        </div>
+        <div class="col-sm-3">
+            <form method="post" action="~/Account/Login">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="projectManager" value="true" />
+                <input type="submit" value="Sign In As Project Manager" class="btn btn-primary" />
+            </form>
+        </div>
+        <div class="col-sm-3">
+            <form method="post" action="~/Account/Login">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="developer" value="true" />
+                <input type="submit" value="Sign In As Developer" class="btn btn-primary" />
+            </form>
+        </div>
+        <div class="col-sm-3">
+            <form method="post" action="~/Account/Login">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="submitter" value="true" />
+                <input type="submit" value="Sign In As Submitter" class="btn btn-primary" />
+            </form>
+        </div>            
+    </div>
 </div>

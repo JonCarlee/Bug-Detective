@@ -7,6 +7,7 @@ using BugDetective.Models;
 
 namespace BugDetective.Controllers
 {
+            [Authorize(Roles = "Admin, Project Manager")]
     public class ProjectUsersController : Controller
     {
         private UserProjectsHelper helper = new UserProjectsHelper();
@@ -25,7 +26,6 @@ namespace BugDetective.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
         public ActionResult AssignUsers(ProjectUsersViewModel model)
         {
             if (ModelState.IsValid)
@@ -36,7 +36,7 @@ namespace BugDetective.Controllers
                     {
                         helper.AddUserToProject(id, model.projectId);
                     }
-                    return RedirectToAction("Index", "Projects");
+                    return RedirectToAction("Details", "Projects", new { id = model.projectId });
                 }
                 else
                 {
@@ -58,7 +58,6 @@ namespace BugDetective.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
         public ActionResult RemoveUsers(ProjectUsersViewModel model)
         {
             if (ModelState.IsValid)
@@ -69,7 +68,7 @@ namespace BugDetective.Controllers
                     {
                         helper.RemoveUserFromProject(id, model.projectId);
                     }
-                    return RedirectToAction("Index", "Projects");
+                    return RedirectToAction("Details", "Projects", new {id = model.projectId});
                 }
                 else
                 {

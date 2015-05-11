@@ -27,6 +27,8 @@
 
         @foreach (var item in Model.Users)
         {
+            if (item.DisplayName == "Jon Carlee") { }
+            else { 
             <tr>
                 <td>
                     @Html.Raw(item.UserName)
@@ -61,6 +63,7 @@
                     @Html.ActionLink("Delete","Delete", new { Model = item})
                 </td>
             </tr>
+        }
         }
 
     </table>
